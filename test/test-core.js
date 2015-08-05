@@ -10,8 +10,8 @@ describe('aspnet 5 generator', function() {
   it('can be imported', function() {
     var app = require('../app');
     yeoman.assert.notEqual(app, undefined);
-  })
-})
+  });
+});
 
 
 /*
@@ -133,7 +133,7 @@ describe('aspnet - Web Application w/grunt', function() {
     });
 
     it('grunt file created', function() {
-      assert.file('gruntTest/gruntfile.js');
+      assert.file('gruntTest/Gruntfile.js');
     });
 
     it('gulpfile does NOT exist', function() {
@@ -159,7 +159,7 @@ describe('aspnet - Web Application w/o grunt', function() {
     });
 
     it('grunt file does NOT exist', function() {
-      assert.noFile('gulpTest/gruntfile.js');
+      assert.noFile('gulpTest/Gruntfile.js');
     });
   });
 });
@@ -295,11 +295,57 @@ describe('aspnet - Web Application', function() {
 });
 
 /*
+ * yo aspnet Web Application Basic - Grunt option
+ */
+describe('aspnet - Web Application Basic w/grunt', function() {
+
+  util.goCreateApplicationWithOptions('webbasic', 'gruntTest', {
+    grunt: 'grunt'
+  });
+
+  describe('Checking directories', function() {
+    it('Application directory created', function() {
+      assert.file('gruntTest/');
+    });
+
+    it('grunt file created', function() {
+      assert.file('gruntTest/Gruntfile.js');
+    });
+
+    it('gulpfile does NOT exist', function() {
+      assert.noFile('gruntTest/gulpfile.js');
+    });
+  });
+});
+
+/*
+ * yo aspnet Web Application Basic - No Grunt option
+ */
+describe('aspnet - Web Application Basic w/o grunt', function() {
+
+  util.goCreateApplication('webbasic', 'gulpTest');
+
+  describe('Checking directories', function() {
+    it('Application directory created', function() {
+      assert.file('gulpTest/');
+    });
+
+    it('gulp file created', function() {
+      assert.file('gulpTest/gulpfile.js');
+    });
+
+    it('grunt file does NOT exist', function() {
+      assert.noFile('gulpTest/Gruntfile.js');
+    });
+  });
+});
+
+/*
  * yo aspnet Web Application
  */
-describe('aspnet - Web Application Simple', function() {
+describe('aspnet - Web Application Basic', function() {
 
-  util.goCreateApplication('websimple', 'webTest');
+  util.goCreateApplication('webbasic', 'webTest');
 
   describe('Checking directories', function() {
 
@@ -409,6 +455,7 @@ describe('aspnet - Web API Application', function() {
     'webAPITest/project.json',
     'webAPITest/Properties/launchSettings.json',
     'webAPITest/Startup.cs',
+    'webAPITest/.gitignore',
     'webAPITest/wwwroot/README.md'
   ];
   describe('Checking files', function() {

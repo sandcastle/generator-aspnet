@@ -4,12 +4,17 @@ var yosay = require('yosay');
 var chalk = require('chalk');
 var path = require('path');
 var guid = require('uuid');
+var projectName = require('vs_projectname');
 var AspnetGenerator = yeoman.generators.Base.extend({
 
   constructor: function() {
     yeoman.generators.Base.apply(this, arguments);
     // only implemented for web template
-    this.option('grunt');
+    this.option('grunt', {
+      type: Boolean,
+      defaults: false,
+      desc: 'Use the Grunt JavaScript task runner instead of Gulp in web projects.'
+    });
   },
 
 
@@ -26,31 +31,30 @@ var AspnetGenerator = yeoman.generators.Base.extend({
       name: 'type',
       message: 'What type of application do you want to create?',
       choices: [{
-          name: 'Empty Application',
-          value: 'empty'
-        }, {
-          name: 'Console Application',
-          value: 'console'
-        }, {
-          name: 'Web Application',
-          value: 'web'
-        }, {
-          name: 'Web Application Simple [without Membership and Authorization]',
-          value: 'websimple'
-        }, {
-          name: 'Web API Application',
-          value: 'webapi'
-        }, {
-          name: 'Nancy ASP.NET Application',
-          value: 'nancy'
-        }, {
-          name: 'Class Library',
-          value: 'classlib'
-        } //,
-        // {
-        //    name: 'Unit test project',
-        //    value: 'unittest'
-        // }
+            name: 'Empty Application',
+            value: 'empty'
+          }, {
+            name: 'Console Application',
+            value: 'console'
+          }, {
+            name: 'Web Application',
+            value: 'web'
+          }, {
+            name: 'Web Application Basic [without Membership and Authorization]',
+            value: 'webbasic'
+          }, {
+            name: 'Web API Application',
+            value: 'webapi'
+          }, {
+            name: 'Nancy ASP.NET Application',
+            value: 'nancy'
+          }, {
+            name: 'Class Library',
+            value: 'classlib'
+          }, {
+            name: 'Unit test project',
+            value: 'unittest'
+          }
       ]
     }];
 
@@ -74,8 +78,8 @@ var AspnetGenerator = yeoman.generators.Base.extend({
       case 'web':
         app = 'WebApplication';
         break;
-      case 'websimple':
-        app = 'WebApplicationSimple';
+      case 'webbasic':
+        app = 'WebApplicationBasic';
         break;
       case 'webapi':
         app = 'WebAPIApplication';
@@ -96,7 +100,7 @@ var AspnetGenerator = yeoman.generators.Base.extend({
       default: app
     }];
     this.prompt(prompts, function(props) {
-      this.templatedata.namespace = props.applicationName;
+      this.templatedata.namespace = projectName(props.applicationName);
       this.templatedata.applicationname = props.applicationName;
       this.applicationName = props.applicationName;
       this.templatedata.guid = guid.v4();
@@ -127,7 +131,7 @@ var AspnetGenerator = yeoman.generators.Base.extend({
 
       case 'webapi':
         this.sourceRoot(path.join(__dirname, '../templates/projects/' + this.type));
-        this.fs.copy(this.sourceRoot() + '/../../gitignore.txt', this.applicationName + '.gitignore');
+        this.fs.copy(this.sourceRoot() + '/../../gitignore.txt', this.applicationName + '/.gitignore');
         this.fs.copy(this.sourceRoot() + '/hosting.ini', this.applicationName + '/hosting.ini');
         this.fs.copyTpl(this.sourceRoot() + '/Startup.cs', this.applicationName + '/Startup.cs', this.templatedata);
         this.fs.copy(this.sourceRoot() + '/project.json', this.applicationName + '/project.json');
@@ -140,7 +144,7 @@ var AspnetGenerator = yeoman.generators.Base.extend({
         this.sourceRoot(path.join(__dirname, '../templates/projects/' + this.type));
         // Grunt or Gulp
         if (this.options.grunt) {
-          this.fs.copyTpl(this.templatePath('gruntfile.js'), this.applicationName + '/gruntfile.js', this.templatedata);
+          this.fs.copyTpl(this.templatePath('Gruntfile.js'), this.applicationName + '/Gruntfile.js', this.templatedata);
         } else {
           this.fs.copyTpl(this.templatePath('gulpfile.js'), this.applicationName + '/gulpfile.js', this.templatedata);
         }
@@ -174,11 +178,11 @@ var AspnetGenerator = yeoman.generators.Base.extend({
         // So again it is copied 1-to-1 - but tests cover list of all files
         this.fs.copy(this.templatePath('wwwroot/**/*'), this.applicationName + '/wwwroot');
         break;
-      case 'websimple':
+      case 'webbasic':
         this.sourceRoot(path.join(__dirname, '../templates/projects/' + this.type));
         // Grunt or Gulp
         if (this.options.grunt) {
-          this.fs.copyTpl(this.templatePath('gruntfile.js'), this.applicationName + '/gruntfile.js', this.templatedata);
+          this.fs.copyTpl(this.templatePath('Gruntfile.js'), this.applicationName + '/Gruntfile.js', this.templatedata);
         } else {
           this.fs.copyTpl(this.templatePath('gulpfile.js'), this.applicationName + '/gulpfile.js', this.templatedata);
         }
@@ -231,7 +235,7 @@ var AspnetGenerator = yeoman.generators.Base.extend({
         break;
       case 'unittest':
         this.sourceRoot(path.join(__dirname, '../templates/projects/' + this.type));
-        this.fs.copy(this.templatePath('**.*'), this.destinationPath(this.applicationName));
+        this.fs.copyTpl(this.templatePath('**.*'), this.destinationPath(this.applicationName), this.templatedata);
         break;
       default:
         this.log('Unknown project type');
